@@ -1,6 +1,6 @@
 {
   "name": "pwa-template",
-  "version": "1.0.5",
+  "version": "2.0.0",
   "description": "Platform for building and running agro apps",
   "main": "index.js",
   "homepage": "https://slametsampon.github.io/pwa-template",
@@ -10,7 +10,7 @@
     "tailwind:watch": "npx @tailwindcss/cli -i ./frontend/src/style.css -o ./build/frontend/style.css --watch",
     "tailwind:build": "npx @tailwindcss/cli -i ./frontend/src/style.css -o ./build/frontend/style.css --minify",
     "clean": "npx rimraf build/frontend",
-    "build:frontend": "npm run clean && npm run tailwind:build && cross-env NODE_ENV=pre-release node frontend/esbuild.config.js",
+    "build:frontend": "npm run clean && npm run tailwind:build && cross-env NODE_ENV=pre-release node frontend/esbuild.config.js && node frontend/pwa/generate-sw.js",
     "deploy:github": "npm run build:frontend && gh-pages -d build/frontend",
     "server": "tsx watch backend/src/main.ts",
     "build:backend": "tsc -p backend/tsconfig.json",
@@ -47,10 +47,13 @@
     "better-sqlite3": "^12.2.0",
     "chart": "^0.1.2",
     "fastify": "^5.5.0",
+    "idb": "^8.0.3",
     "lit": "^3.3.1",
     "lucide": "^0.542.0",
     "mime": "^3.0.0",
     "mqtt": "^5.14.0",
-    "tailwindcss": "^4.1.11"
+    "tailwindcss": "^4.1.11",
+    "workbox-build": "^7.3.0",
+    "workbox-window": "^7.3.0"
   }
 }

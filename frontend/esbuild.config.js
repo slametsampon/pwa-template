@@ -174,3 +174,6 @@ const main = async () => {
 };
 
 main();
+// Di bagian bawah main()
+copyFolderRecursive('frontend/src/assets', path.join(outputDir, 'assets'));
+copyFolderRecursive('frontend/src/pwa', path.join(outputDir, 'pwa')); // ⬅️ Tambahan baru

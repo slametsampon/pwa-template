@@ -56,6 +56,10 @@
 
     <!-- ✅ Entry point -->
     <script type="module" src="./main.js"></script>
+
+    <!-- ✅ PWA additional -->
+    <link rel="manifest" href="./pwa/manifest.webmanifest" />
+    <meta name="theme-color" content="#2563eb" />
   </head>
   <body class="bg-gray-100 font-sans text-gray-800">
     <!-- Root shell (routing + layout handled here) -->
@@ -68,5 +72,34 @@
     <species-detail-dialog></species-detail-dialog>
     <livestock-detail-dialog></livestock-detail-dialog>
     -->
+    <script>
+      (function () {
+        const env =
+          (window && window.__ENV__) ||
+          (typeof process !== 'undefined'
+            ? process.env.NODE_ENV
+            : 'production');
+        const shouldRegister =
+          typeof navigator !== 'undefined' &&
+          'serviceWorker' in navigator &&
+          (env === 'pre-release' || env === 'production');
+
+        if (shouldRegister) {
+          window.addEventListener('load', () => {
+            navigator.serviceWorker
+              .register('./pwa/service-worker.js')
+              .then(() => console.log('✅ SW registered'))
+              .catch(console.error);
+          });
+        } else {
+          // optional safety: pastikan tidak ada SW lama waktu dev
+          if ('serviceWorker' in navigator) {
+            navigator.serviceWorker
+              .getRegistrations()
+              .then((regs) => regs.forEach((r) => r.unregister()));
+          }
+        }
+      })();
+    </script>
   </body>
 </html>
