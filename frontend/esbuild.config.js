@@ -13,7 +13,7 @@ const pkg = JSON.parse(
 );
 
 let publicPath = '/';
-if (isPreRelease) publicPath = '/spa-template';
+if (isPreRelease) publicPath = '/pwa-template';
 if (isProd) publicPath = '';
 
 const outputDir = path.resolve(__dirname, '../build/frontend');

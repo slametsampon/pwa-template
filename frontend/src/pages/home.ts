@@ -16,45 +16,58 @@ export class PageHome extends LitElement {
       <section class="p-6 space-y-6 max-w-5xl mx-auto">
         <div>
           <h1 class="text-2xl font-bold text-green-800 mb-2">
-            🎉 Selamat Datang di SPA-Template
+            🚀 Selamat Datang di PWA-Template
           </h1>
           <p class="text-gray-700 text-base leading-relaxed">
-            <span class="font-semibold">SPA-Template</span> adalah kerangka
-            kerja modern untuk membangun aplikasi berbasis web yang ringan dan
-            modular, menggunakan
-            <span class="font-semibold">LitElement</span> dan
-            <span class="font-semibold">Tailwind CSS</span>. Template ini
-            dirancang dengan fokus pada performa, keterbacaan kode, dan
-            kemudahan pemeliharaan untuk pengembangan skala kecil hingga besar.
+            <span class="font-semibold">PWA-Template</span> adalah kerangka
+            kerja (_template_) modern untuk membangun
+            <span class="font-semibold text-green-700"
+              >Progressive Web App (PWA)</span
+            >
+            yang cepat, dapat diinstal seperti aplikasi native, dan berfungsi
+            penuh bahkan saat <span class="font-semibold">offline</span>.
+          </p>
+
+          <p class="text-gray-700 text-base leading-relaxed mt-2">
+            Template ini dibangun menggunakan
+            <span class="font-semibold">Lit Web Components</span> dan
+            <span class="font-semibold">Tailwind CSS</span>, dikombinasikan
+            dengan sistem bundling cepat dari
+            <span class="font-semibold">esbuild</span>, serta caching pintar
+            melalui <span class="font-semibold">Workbox</span> dan
+            <span class="font-semibold">IndexedDB (idb)</span>. Arsitektur
+            berbasis <span class="italic">App Shell</span> menjamin waktu muat
+            super cepat dan pengalaman pengguna yang stabil.
           </p>
         </div>
 
         <div class="grid md:grid-cols-3 gap-4">
           <feature-card
-            title="Web Components"
-            icon="🧩"
+            title="App Shell Architecture"
+            icon="🏗️"
             color="green"
-            description="Bangun antarmuka modular, reusable, dan berbasis standar web melalui LitElement."
+            description="Struktur UI utama (header, footer, router) dimuat instan dari cache agar tetap berfungsi tanpa koneksi internet."
           ></feature-card>
 
           <feature-card
-            title="Tailwind CSS"
-            icon="🎨"
+            title="Offline Data"
+            icon="💾"
             color="blue"
-            description="Gunakan pendekatan utility-first untuk styling yang efisien dan konsisten tanpa CSS tambahan."
+            description="Simpan dan tampilkan data API secara lokal menggunakan IndexedDB — tetap berfungsi walau jaringan terputus."
           ></feature-card>
 
           <feature-card
-            title="Build Cepat"
+            title="Cepat & Installable"
             icon="⚡"
             color="yellow"
-            description="Proses bundling super cepat menggunakan esbuild — cocok untuk pengembangan dan produksi."
+            description="Build super cepat dengan esbuild dan PWA manifest yang memungkinkan aplikasi diinstal ke perangkat pengguna."
           ></feature-card>
         </div>
 
-        <footer class="text-sm text-gray-500 mt-6">
-          Gunakan menu navigasi di bagian atas untuk menjelajahi struktur
-          komponen, halaman, serta dokumentasi lainnya dari SPA-Template.
+        <footer class="text-sm text-gray-500 mt-6 text-center">
+          Gunakan menu navigasi di bagian atas untuk menjelajahi fitur,
+          dokumentasi, dan arsitektur dari
+          <span class="font-semibold text-green-600">PWA-Template</span>.
         </footer>
       </section>
     `;

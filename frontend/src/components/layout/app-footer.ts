@@ -23,7 +23,7 @@ export class AppFooter extends LitElement {
           <div class="flex items-center gap-2">
             <span class="text-base">©</span>
             <span>
-              ${new Date().getFullYear()} spa-template v${__APP_VERSION__} — All
+              ${new Date().getFullYear()} pwa-template v${__APP_VERSION__} — All
               rights reserved.
             </span>
           </div>
@@ -36,7 +36,7 @@ export class AppFooter extends LitElement {
             >
             <span class="text-gray-400">|</span>
             <a
-              href="https://github.com/slametsampon/spa-template"
+              href="https://github.com/slametsampon/pwa-template"
               target="_blank"
               rel="noopener"
               class="text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-700 dark:hover:text-blue-300 transition"
