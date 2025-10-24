@@ -1,17 +1,17 @@
 // frontend/pwa/generate-sw.js
 
-import { generateSW } from 'workbox-build';
-import path from 'path';
-import fs from 'fs';
+const { generateSW } = require('workbox-build');
+const path = require('path');
+const fs = require('fs');
 
 const BUILD_DIR = path.resolve('build/frontend');
 const isPreRelease = process.env.NODE_ENV === 'pre-release';
-const BASE_PATH = isPreRelease ? '/spa-template/' : '/';
+const BASE_PATH = isPreRelease ? '/pwa-template/' : '/';
 
 const PWA_DIR = path.join(BUILD_DIR, 'pwa');
 if (!fs.existsSync(PWA_DIR)) fs.mkdirSync(PWA_DIR, { recursive: true });
 
-await generateSW({
+generateSW({
   globDirectory: BUILD_DIR,
   globPatterns: ['**/*.{html,js,css,png,svg,ico,json,webp}'],
   swDest: path.join(PWA_DIR, 'service-worker.js'),
@@ -37,6 +37,11 @@ await generateSW({
       options: { cacheName: 'api-cache', networkTimeoutSeconds: 5 },
     },
   ],
-});
-
-console.log('✅ SW generated');
+})
+  .then(({ count, size }) => {
+    console.log(`✅ Service Worker generated (${count} files, ${size} bytes)`);
+  })
+  .catch((err) => {
+    console.error('❌ Failed to generate Service Worker:', err);
+    process.exit(1);
+  });
