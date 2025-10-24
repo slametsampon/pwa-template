@@ -1754,6 +1754,307 @@ var init_about = __esm({
   }
 });
 
+// ../node_modules/idb/build/index.js
+function getIdbProxyableTypes() {
+  return idbProxyableTypes || (idbProxyableTypes = [
+    IDBDatabase,
+    IDBObjectStore,
+    IDBIndex,
+    IDBCursor,
+    IDBTransaction
+  ]);
+}
+function getCursorAdvanceMethods() {
+  return cursorAdvanceMethods || (cursorAdvanceMethods = [
+    IDBCursor.prototype.advance,
+    IDBCursor.prototype.continue,
+    IDBCursor.prototype.continuePrimaryKey
+  ]);
+}
+function promisifyRequest(request) {
+  const promise = new Promise((resolve, reject) => {
+    const unlisten = () => {
+      request.removeEventListener("success", success);
+      request.removeEventListener("error", error);
+    };
+    const success = () => {
+      resolve(wrap(request.result));
+      unlisten();
+    };
+    const error = () => {
+      reject(request.error);
+      unlisten();
+    };
+    request.addEventListener("success", success);
+    request.addEventListener("error", error);
+  });
+  reverseTransformCache.set(promise, request);
+  return promise;
+}
+function cacheDonePromiseForTransaction(tx2) {
+  if (transactionDoneMap.has(tx2))
+    return;
+  const done = new Promise((resolve, reject) => {
+    const unlisten = () => {
+      tx2.removeEventListener("complete", complete);
+      tx2.removeEventListener("error", error);
+      tx2.removeEventListener("abort", error);
+    };
+    const complete = () => {
+      resolve();
+      unlisten();
+    };
+    const error = () => {
+      reject(tx2.error || new DOMException("AbortError", "AbortError"));
+      unlisten();
+    };
+    tx2.addEventListener("complete", complete);
+    tx2.addEventListener("error", error);
+    tx2.addEventListener("abort", error);
+  });
+  transactionDoneMap.set(tx2, done);
+}
+function replaceTraps(callback) {
+  idbProxyTraps = callback(idbProxyTraps);
+}
+function wrapFunction(func) {
+  if (getCursorAdvanceMethods().includes(func)) {
+    return function(...args) {
+      func.apply(unwrap(this), args);
+      return wrap(this.request);
+    };
+  }
+  return function(...args) {
+    return wrap(func.apply(unwrap(this), args));
+  };
+}
+function transformCachableValue(value) {
+  if (typeof value === "function")
+    return wrapFunction(value);
+  if (value instanceof IDBTransaction)
+    cacheDonePromiseForTransaction(value);
+  if (instanceOfAny(value, getIdbProxyableTypes()))
+    return new Proxy(value, idbProxyTraps);
+  return value;
+}
+function wrap(value) {
+  if (value instanceof IDBRequest)
+    return promisifyRequest(value);
+  if (transformCache.has(value))
+    return transformCache.get(value);
+  const newValue = transformCachableValue(value);
+  if (newValue !== value) {
+    transformCache.set(value, newValue);
+    reverseTransformCache.set(newValue, value);
+  }
+  return newValue;
+}
+function openDB(name2, version, { blocked, upgrade, blocking, terminated } = {}) {
+  const request = indexedDB.open(name2, version);
+  const openPromise = wrap(request);
+  if (upgrade) {
+    request.addEventListener("upgradeneeded", (event) => {
+      upgrade(wrap(request.result), event.oldVersion, event.newVersion, wrap(request.transaction), event);
+    });
+  }
+  if (blocked) {
+    request.addEventListener("blocked", (event) => blocked(
+      // Casting due to https://github.com/microsoft/TypeScript-DOM-lib-generator/pull/1405
+      event.oldVersion,
+      event.newVersion,
+      event
+    ));
+  }
+  openPromise.then((db2) => {
+    if (terminated)
+      db2.addEventListener("close", () => terminated());
+    if (blocking) {
+      db2.addEventListener("versionchange", (event) => blocking(event.oldVersion, event.newVersion, event));
+    }
+  }).catch(() => {
+  });
+  return openPromise;
+}
+function getMethod(target, prop) {
+  if (!(target instanceof IDBDatabase && !(prop in target) && typeof prop === "string")) {
+    return;
+  }
+  if (cachedMethods.get(prop))
+    return cachedMethods.get(prop);
+  const targetFuncName = prop.replace(/FromIndex$/, "");
+  const useIndex = prop !== targetFuncName;
+  const isWrite = writeMethods.includes(targetFuncName);
+  if (
+    // Bail if the target doesn't exist on the target. Eg, getAll isn't in Edge.
+    !(targetFuncName in (useIndex ? IDBIndex : IDBObjectStore).prototype) || !(isWrite || readMethods.includes(targetFuncName))
+  ) {
+    return;
+  }
+  const method = async function(storeName, ...args) {
+    const tx2 = this.transaction(storeName, isWrite ? "readwrite" : "readonly");
+    let target2 = tx2.store;
+    if (useIndex)
+      target2 = target2.index(args.shift());
+    return (await Promise.all([
+      target2[targetFuncName](...args),
+      isWrite && tx2.done
+    ]))[0];
+  };
+  cachedMethods.set(prop, method);
+  return method;
+}
+async function* iterate(...args) {
+  let cursor = this;
+  if (!(cursor instanceof IDBCursor)) {
+    cursor = await cursor.openCursor(...args);
+  }
+  if (!cursor)
+    return;
+  cursor = cursor;
+  const proxiedCursor = new Proxy(cursor, cursorIteratorTraps);
+  ittrProxiedCursorToOriginalProxy.set(proxiedCursor, cursor);
+  reverseTransformCache.set(proxiedCursor, unwrap(cursor));
+  while (cursor) {
+    yield proxiedCursor;
+    cursor = await (advanceResults.get(proxiedCursor) || cursor.continue());
+    advanceResults.delete(proxiedCursor);
+  }
+}
+function isIteratorProp(target, prop) {
+  return prop === Symbol.asyncIterator && instanceOfAny(target, [IDBIndex, IDBObjectStore, IDBCursor]) || prop === "iterate" && instanceOfAny(target, [IDBIndex, IDBObjectStore]);
+}
+var instanceOfAny, idbProxyableTypes, cursorAdvanceMethods, transactionDoneMap, transformCache, reverseTransformCache, idbProxyTraps, unwrap, readMethods, writeMethods, cachedMethods, advanceMethodProps, methodMap, advanceResults, ittrProxiedCursorToOriginalProxy, cursorIteratorTraps;
+var init_build = __esm({
+  "../node_modules/idb/build/index.js"() {
+    "use strict";
+    instanceOfAny = (object, constructors) => constructors.some((c5) => object instanceof c5);
+    transactionDoneMap = /* @__PURE__ */ new WeakMap();
+    transformCache = /* @__PURE__ */ new WeakMap();
+    reverseTransformCache = /* @__PURE__ */ new WeakMap();
+    idbProxyTraps = {
+      get(target, prop, receiver) {
+        if (target instanceof IDBTransaction) {
+          if (prop === "done")
+            return transactionDoneMap.get(target);
+          if (prop === "store") {
+            return receiver.objectStoreNames[1] ? void 0 : receiver.objectStore(receiver.objectStoreNames[0]);
+          }
+        }
+        return wrap(target[prop]);
+      },
+      set(target, prop, value) {
+        target[prop] = value;
+        return true;
+      },
+      has(target, prop) {
+        if (target instanceof IDBTransaction && (prop === "done" || prop === "store")) {
+          return true;
+        }
+        return prop in target;
+      }
+    };
+    unwrap = (value) => reverseTransformCache.get(value);
+    readMethods = ["get", "getKey", "getAll", "getAllKeys", "count"];
+    writeMethods = ["put", "add", "delete", "clear"];
+    cachedMethods = /* @__PURE__ */ new Map();
+    replaceTraps((oldTraps) => ({
+      ...oldTraps,
+      get: (target, prop, receiver) => getMethod(target, prop) || oldTraps.get(target, prop, receiver),
+      has: (target, prop) => !!getMethod(target, prop) || oldTraps.has(target, prop)
+    }));
+    advanceMethodProps = ["continue", "continuePrimaryKey", "advance"];
+    methodMap = {};
+    advanceResults = /* @__PURE__ */ new WeakMap();
+    ittrProxiedCursorToOriginalProxy = /* @__PURE__ */ new WeakMap();
+    cursorIteratorTraps = {
+      get(target, prop) {
+        if (!advanceMethodProps.includes(prop))
+          return target[prop];
+        let cachedFunc = methodMap[prop];
+        if (!cachedFunc) {
+          cachedFunc = methodMap[prop] = function(...args) {
+            advanceResults.set(this, ittrProxiedCursorToOriginalProxy.get(this)[prop](...args));
+          };
+        }
+        return cachedFunc;
+      }
+    };
+    replaceTraps((oldTraps) => ({
+      ...oldTraps,
+      get(target, prop, receiver) {
+        if (isIteratorProp(target, prop))
+          return iterate;
+        return oldTraps.get(target, prop, receiver);
+      },
+      has(target, prop) {
+        return isIteratorProp(target, prop) || oldTraps.has(target, prop);
+      }
+    }));
+  }
+});
+
+// src/utils/cacheStore.ts
+async function setCache(key, data, ttlMs) {
+  const db2 = await dbPromise;
+  await db2.put(STORE, data, key);
+  if (ttlMs) {
+    const expireAt = Date.now() + ttlMs;
+    await db2.put(META, { expireAt }, `${key}:ttl`);
+  }
+}
+async function getCache(key) {
+  const db2 = await dbPromise;
+  const meta = await db2.get(META, `${key}:ttl`);
+  if (meta?.expireAt && Date.now() > meta.expireAt) {
+    await db2.delete(STORE, key);
+    await db2.delete(META, `${key}:ttl`);
+    return null;
+  }
+  return await db2.get(STORE, key) ?? null;
+}
+var DB_NAME, DB_VERSION, STORE, META, dbPromise;
+var init_cacheStore = __esm({
+  "src/utils/cacheStore.ts"() {
+    "use strict";
+    init_build();
+    DB_NAME = "pwa-template-cache";
+    DB_VERSION = 1;
+    STORE = "apiCache";
+    META = "meta";
+    dbPromise = openDB(DB_NAME, DB_VERSION, {
+      upgrade(db2) {
+        if (!db2.objectStoreNames.contains(STORE)) db2.createObjectStore(STORE);
+        if (!db2.objectStoreNames.contains(META)) db2.createObjectStore(META);
+      }
+    });
+  }
+});
+
+// src/utils/apiClient.ts
+async function fetchWithCache(url, opts) {
+  const { ttlMs = 5 * 60 * 1e3 } = opts || {};
+  try {
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    await setCache(url, data, ttlMs);
+    return data;
+  } catch (e8) {
+    const cached = await getCache(url);
+    if (cached) {
+      console.warn(`\u26A0\uFE0F Offline/failed. Using cache for ${url}`);
+      return cached;
+    }
+    throw e8;
+  }
+}
+var init_apiClient = __esm({
+  "src/utils/apiClient.ts"() {
+    "use strict";
+    init_cacheStore();
+  }
+});
+
 // src/pages/dashboard.ts
 var dashboard_exports = {};
 __export(dashboard_exports, {
@@ -1765,13 +2066,35 @@ var init_dashboard = __esm({
     "use strict";
     init_lit();
     init_decorators();
+    init_apiClient();
     PageDashboard = class extends i4 {
       constructor() {
         super(...arguments);
         this.activeTab = "produksi";
+        this.summary = null;
+        this.offline = false;
       }
       createRenderRoot() {
         return this;
+      }
+      connectedCallback() {
+        super.connectedCallback();
+        this.loadSummaryData();
+      }
+      /**
+       * Contoh pemanggilan API dengan fallback ke IndexedDB
+       */
+      async loadSummaryData() {
+        try {
+          const data = await fetchWithCache("/api/summary", {
+            ttlMs: 10 * 60 * 1e3
+          });
+          this.summary = data;
+          this.offline = false;
+        } catch (err) {
+          console.warn("\u26A0\uFE0F Tidak dapat memuat data summary:", err);
+          this.offline = true;
+        }
       }
       handleTabChange(e8) {
         const target = e8.currentTarget;
@@ -1782,50 +2105,86 @@ var init_dashboard = __esm({
         return x`
       <div class="p-6 space-y-6">
         <div class="flex space-x-4 border-b pb-2">
-          <button
-            data-id="produksi"
-            @click=${this.handleTabChange}
-            class=${this.activeTab === "produksi" ? "text-green-700 font-semibold border-b-2 border-green-600 pb-1" : "text-gray-500 hover:text-green-600"}
-          >
-            🏭 Produksi
-          </button>
-          <button
-            data-id="devices"
-            @click=${this.handleTabChange}
-            class=${this.activeTab === "devices" ? "text-green-700 font-semibold border-b-2 border-green-600 pb-1" : "text-gray-500 hover:text-green-600"}
-          >
-            🔌 Devices
-          </button>
-          <button
-            data-id="history"
-            @click=${this.handleTabChange}
-            class=${this.activeTab === "history" ? "text-green-700 font-semibold border-b-2 border-green-600 pb-1" : "text-gray-500 hover:text-green-600"}
-          >
-            📜 Event History
-          </button>
+          ${["produksi", "devices", "history"].map(
+          (tab) => x`
+              <button
+                data-id=${tab}
+                @click=${this.handleTabChange}
+                class=${this.activeTab === tab ? "text-green-700 font-semibold border-b-2 border-green-600 pb-1" : "text-gray-500 hover:text-green-600"}
+              >
+                ${tab === "produksi" ? "\u{1F3ED} Produksi" : tab === "devices" ? "\u{1F50C} Devices" : "\u{1F4DC} Event History"}
+              </button>
+            `
+        )}
         </div>
 
-        ${this.activeTab === "produksi" ? x`
-              <div
-                class="bg-yellow-50 border border-yellow-300 p-4 rounded text-sm text-yellow-800"
-              >
-                Halaman dummy tab <strong>Produksi</strong> — belum ada konten.
-              </div>
-            ` : this.activeTab === "devices" ? x`
-              <div
-                class="bg-yellow-50 border border-yellow-300 p-4 rounded text-sm text-yellow-800"
-              >
-                Halaman dummy tab <strong>Devices</strong> — placeholder tanpa
-                integrasi MQTT.
+        <!-- Status koneksi / data -->
+        <div class="text-sm text-gray-600 mt-2">
+          ${this.offline ? x`<span class="text-yellow-700"
+                >⚠️ Mode offline — menampilkan data terakhir.</span
+              >` : this.summary ? x`<span class="text-green-700">✅ Data terbaru dimuat.</span>` : x`<span class="text-gray-500">⏳ Memuat data...</span>`}
+        </div>
+
+        <!-- Isi tab aktif -->
+        ${this.activeTab === "produksi" ? this.renderProduksiTab() : this.activeTab === "devices" ? this.renderDevicesTab() : this.renderHistoryTab()}
+      </div>
+    `;
+      }
+      renderProduksiTab() {
+        return x`
+      <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+        <h2 class="text-lg font-semibold text-green-700 mb-4">
+          📊 Produksi Hari Ini
+        </h2>
+
+        ${this.summary ? x`
+              <div class="grid md:grid-cols-3 gap-4 text-center">
+                <div class="p-3 bg-green-50 rounded-lg">
+                  <p class="text-sm text-gray-600">Total Produksi</p>
+                  <p class="text-2xl font-bold text-green-700">
+                    ${this.summary.produksi ?? "-"}
+                  </p>
+                </div>
+                <div class="p-3 bg-blue-50 rounded-lg">
+                  <p class="text-sm text-gray-600">Unit Aktif</p>
+                  <p class="text-2xl font-bold text-blue-700">
+                    ${this.summary.devices ?? "-"}
+                  </p>
+                </div>
+                <div class="p-3 bg-yellow-50 rounded-lg">
+                  <p class="text-sm text-gray-600">Terakhir Update</p>
+                  <p class="text-base text-yellow-800">
+                    ${this.summary.updatedAt ? new Date(this.summary.updatedAt).toLocaleString() : "-"}
+                  </p>
+                </div>
               </div>
             ` : x`
               <div
                 class="bg-yellow-50 border border-yellow-300 p-4 rounded text-sm text-yellow-800"
               >
-                Halaman dummy tab <strong>Event History</strong> — belum
-                terhubung ke backend.
+                Belum ada data produksi. Periksa koneksi atau cache IndexedDB.
               </div>
             `}
+      </div>
+    `;
+      }
+      renderDevicesTab() {
+        return x`
+      <div
+        class="bg-yellow-50 border border-yellow-300 p-4 rounded text-sm text-yellow-800"
+      >
+        Halaman dummy tab <strong>Devices</strong> — placeholder tanpa integrasi
+        MQTT.
+      </div>
+    `;
+      }
+      renderHistoryTab() {
+        return x`
+      <div
+        class="bg-yellow-50 border border-yellow-300 p-4 rounded text-sm text-yellow-800"
+      >
+        Halaman dummy tab <strong>Event History</strong> — belum terhubung ke
+        backend.
       </div>
     `;
       }
@@ -1833,6 +2192,12 @@ var init_dashboard = __esm({
     __decorateClass([
       r5()
     ], PageDashboard.prototype, "activeTab", 2);
+    __decorateClass([
+      r5()
+    ], PageDashboard.prototype, "summary", 2);
+    __decorateClass([
+      r5()
+    ], PageDashboard.prototype, "offline", 2);
     PageDashboard = __decorateClass([
       t3("page-dashboard")
     ], PageDashboard);
@@ -2673,7 +3038,7 @@ var AppFooter = class extends i4 {
           <div class="flex items-center gap-2">
             <span class="text-base">©</span>
             <span>
-              ${(/* @__PURE__ */ new Date()).getFullYear()} pwa-template v${"1.0.5"} — All
+              ${(/* @__PURE__ */ new Date()).getFullYear()} pwa-template v${"2.0.1"} — All
               rights reserved.
             </span>
           </div>
