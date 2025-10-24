@@ -1,0 +1,72 @@
+<!-- frontend/src/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <base href="__BASE_PATH__" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ✅ SEO Meta Tags -->
+    <title>spa-template – Starter SPA Template LitElement + Tailwind</title>
+    <meta
+      name="description"
+      content="spa-template adalah template proyek siap pakai untuk membangun antarmuka modular berbasis LitElement dan Tailwind CSS."
+    />
+    <meta
+      name="keywords"
+      content="spa-template, LitElement, Tailwind CSS, Web Components, UI Template, Component Driven Development, esbuild"
+    />
+    <meta name="author" content="spa-template contributors" />
+
+    <!-- ✅ Open Graph / Social Media Sharing -->
+    <meta
+      property="og:title"
+      content="spa-template – Starter Template LitElement + Tailwind"
+    />
+    <meta
+      property="og:description"
+      content="Template UI ringan dan modular berbasis Web Components. Cocok untuk proyek dashboard, IoT UI, dan aplikasi web modern."
+    />
+    <meta property="og:image" content="./assets/raw-logo-crop.png" />
+    <meta property="og:url" content="https://yourdomain.com/spa-template/" />
+    <meta property="og:type" content="website" />
+
+    <!-- ✅ Twitter Card Meta -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="spa-template – Template UI Modular dengan LitElement"
+    />
+    <meta
+      name="twitter:description"
+      content="Template Web Components modular siap pakai dengan dukungan Tailwind dan esbuild."
+    />
+    <meta name="twitter:image" content="./assets/raw-logo-crop.png" />
+    <meta name="twitter:site" content="@yourhandle" />
+
+    <!-- ✅ Favicon & Styles -->
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico" />
+    <link rel="stylesheet" href="./style.css" />
+
+    <!-- 🔧 Base URL untuk backend/dev API (optional) -->
+    <script>
+      window.__API_BASE__ = 'http://127.0.0.1:8080';
+    </script>
+
+    <!-- ✅ Entry point -->
+    <script type="module" src="./main.js"></script>
+  </head>
+  <body class="bg-gray-100 font-sans text-gray-800">
+    <!-- Root shell (routing + layout handled here) -->
+    <app-shell></app-shell>
+
+    <!-- 💡 Komponen dialog (opsional, bisa dihapus jika belum digunakan) -->
+    <!--
+    <device-dialog></device-dialog>
+    <plant-detail-dialog></plant-detail-dialog>
+    <species-detail-dialog></species-detail-dialog>
+    <livestock-detail-dialog></livestock-detail-dialog>
+    -->
+  </body>
+</html>
