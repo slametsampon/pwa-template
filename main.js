@@ -1635,30 +1635,31 @@ var init_about = __esm({
         return x`
       <section class="p-6 md:p-10 max-w-5xl mx-auto">
         <h1 class="text-3xl font-bold text-center text-green-700 mb-6">
-          Tentang SPA-Template
+          Tentang PWA-Template
         </h1>
 
         <p class="text-base text-gray-700 leading-relaxed mb-4">
-          <span class="font-semibold text-green-600">SPA-Template</span> adalah
-          sebuah kerangka kerja (_template_) berbasis komponen untuk membangun
-          aplikasi web modern dengan pendekatan
+          <span class="font-semibold text-green-600">PWA-Template</span> adalah
+          sebuah kerangka kerja (_template_) berbasis
           <span class="font-semibold text-green-600">
-            Single Page Application (SPA)
+            Progressive Web App (PWA)
           </span>
-          dan
-          <span class="font-semibold text-green-600">
-            Component-Driven Development (CDD) </span
-          >. Template ini memanfaatkan kombinasi LitElement, Tailwind CSS, dan
-          esbuild untuk menghasilkan antarmuka pengguna yang ringan, cepat, dan
-          dapat diandalkan.
+          yang dirancang untuk membangun aplikasi web
+          <span class="font-semibold text-green-600">offline-first</span>, cepat
+          diakses, dapat diinstal seperti aplikasi native, dan tetap ringan
+          dijalankan di berbagai perangkat.
         </p>
 
         <p class="text-base text-gray-700 leading-relaxed mb-4">
-          Didesain untuk pengembangan modular dan maintainable, SPA-Template
-          menyediakan fondasi yang solid untuk berbagai jenis aplikasi, mulai
-          dari dashboard IoT, sistem informasi internal, hingga aplikasi mandiri
-          berbasis web. Template ini memudahkan tim dalam menyusun dan mengelola
-          komponen UI secara terpisah serta terorganisir.
+          Template ini memanfaatkan kombinasi teknologi modern seperti
+          <span class="font-medium">Lit</span> untuk pengembangan berbasis
+          komponen, <span class="font-medium">Tailwind CSS</span> untuk sistem
+          styling responsif, serta <span class="font-medium">esbuild</span>
+          untuk proses bundling super cepat. Integrasi
+          <span class="font-medium">Workbox</span> dan
+          <span class="font-medium">IndexedDB (idb)</span> menjadikan aplikasi
+          mampu menyimpan antarmuka maupun data API secara lokal agar tetap
+          dapat digunakan tanpa koneksi internet.
         </p>
 
         <h2 class="text-xl font-semibold text-green-700 mt-8 mb-4">
@@ -1669,49 +1670,79 @@ var init_about = __esm({
           <div>
             <h3 class="text-lg font-semibold text-green-600 mb-2">Frontend</h3>
             <ul class="list-disc list-inside text-gray-700">
-              <li>Framework: <span class="font-medium">LitElement</span></li>
+              <li>
+                Framework: <span class="font-medium">Lit Web Components</span>
+              </li>
               <li>Styling: <span class="font-medium">Tailwind CSS</span></li>
               <li>Build Tool: <span class="font-medium">esbuild</span></li>
               <li>
-                Arsitektur:
-                <span class="font-medium"
-                  >CDD (Component-Driven Development)</span
-                >
+                Arsitektur: <span class="font-medium">App Shell Model</span>
               </li>
               <li>Bahasa: <span class="font-medium">TypeScript</span></li>
             </ul>
           </div>
           <div>
             <h3 class="text-lg font-semibold text-green-600 mb-2">
-              Integrasi Opsional
+              Integrasi PWA & Opsional
             </h3>
             <ul class="list-disc list-inside text-gray-700">
-              <li>Dukungan MQTT via WebSocket (untuk sistem IoT)</li>
-              <li>REST API backend (Fastify, Express, dll)</li>
               <li>
-                Kompatibel dengan hosting lokal: Raspberry Pi / Static Host
+                Service Worker otomatis dengan
+                <span class="font-medium">Workbox</span>
               </li>
-              <li>Deployment ke GitHub Pages, Vercel, Netlify, dll.</li>
+              <li>
+                Penyimpanan data offline via
+                <span class="font-medium">IndexedDB (idb)</span>
+              </li>
+              <li>Dukungan MQTT over WebSocket (IoT ready)</li>
+              <li>REST API backend (Fastify, Express, dll.)</li>
+              <li>Kompatibel dengan hosting ringan seperti Raspberry Pi</li>
+              <li>Deployment otomatis ke GitHub Pages, Netlify, dan Vercel</li>
             </ul>
           </div>
         </div>
 
         <h2 class="text-xl font-semibold text-green-700 mt-10 mb-4">
-          Struktur Modular
+          Arsitektur App Shell & Offline-First
         </h2>
 
         <p class="text-base text-gray-700 leading-relaxed mb-4">
-          Kode sumber terstruktur berdasarkan pemisahan tanggung jawab:
-          komponen, halaman, layanan data, dan konteks aplikasi dipisahkan dalam
-          direktori yang jelas. Pendekatan ini mendukung kolaborasi tim,
-          pemeliharaan jangka panjang, serta skalabilitas.
+          PWA-Template mengimplementasikan
+          <span class="font-semibold text-green-600"
+            >App Shell Architecture</span
+          >, di mana elemen statis seperti header, footer, dan router utama akan
+          dicache secara permanen oleh Service Worker agar dapat dimuat secara
+          instan bahkan tanpa koneksi internet. Sementara itu, data dinamis dari
+          API disimpan menggunakan IndexedDB sehingga pengguna tetap dapat
+          melihat informasi terakhir yang tersimpan.
+        </p>
+
+        <p class="text-base text-gray-700 leading-relaxed mb-4">
+          Pendekatan ini membuat aplikasi terasa cepat, andal, dan hemat
+          bandwidth. Setiap kali koneksi kembali tersedia, sistem akan
+          menyinkronkan data baru secara otomatis, menjaga pengalaman pengguna
+          tetap konsisten.
+        </p>
+
+        <h2 class="text-xl font-semibold text-green-700 mt-10 mb-4">
+          Struktur Modular & Skalabilitas
+        </h2>
+
+        <p class="text-base text-gray-700 leading-relaxed mb-4">
+          Kode sumber terstruktur berdasarkan prinsip pemisahan tanggung jawab —
+          komponen, halaman, layanan data, dan konteks aplikasi dikelola dalam
+          direktori terpisah. Pendekatan ini mempermudah kolaborasi tim,
+          meminimalkan kompleksitas, dan memudahkan pengembangan fitur baru.
         </p>
 
         <p class="text-base text-gray-700 leading-relaxed">
-          Dengan arsitektur ringan dan berbasis standar web modern,
-          <span class="font-semibold text-green-600">SPA-Template</span> dapat
-          dijadikan fondasi bagi berbagai solusi antarmuka yang responsif,
-          terdistribusi, dan sepenuhnya open-source.
+          Dengan menggabungkan kekuatan
+          <span class="font-semibold text-green-600">Lit</span>,
+          <span class="font-semibold text-green-600">Tailwind CSS</span>, dan
+          kemampuan <span class="font-semibold text-green-600">PWA</span>,
+          <span class="font-semibold text-green-600">PWA-Template</span> menjadi
+          fondasi ideal untuk membangun aplikasi web yang cepat, responsif,
+          dapat diinstal, serta berfungsi penuh bahkan tanpa koneksi internet.
         </p>
       </section>
     `;
@@ -2042,45 +2073,58 @@ var init_home = __esm({
       <section class="p-6 space-y-6 max-w-5xl mx-auto">
         <div>
           <h1 class="text-2xl font-bold text-green-800 mb-2">
-            🎉 Selamat Datang di SPA-Template
+            🚀 Selamat Datang di PWA-Template
           </h1>
           <p class="text-gray-700 text-base leading-relaxed">
-            <span class="font-semibold">SPA-Template</span> adalah kerangka
-            kerja modern untuk membangun aplikasi berbasis web yang ringan dan
-            modular, menggunakan
-            <span class="font-semibold">LitElement</span> dan
-            <span class="font-semibold">Tailwind CSS</span>. Template ini
-            dirancang dengan fokus pada performa, keterbacaan kode, dan
-            kemudahan pemeliharaan untuk pengembangan skala kecil hingga besar.
+            <span class="font-semibold">PWA-Template</span> adalah kerangka
+            kerja (_template_) modern untuk membangun
+            <span class="font-semibold text-green-700"
+              >Progressive Web App (PWA)</span
+            >
+            yang cepat, dapat diinstal seperti aplikasi native, dan berfungsi
+            penuh bahkan saat <span class="font-semibold">offline</span>.
+          </p>
+
+          <p class="text-gray-700 text-base leading-relaxed mt-2">
+            Template ini dibangun menggunakan
+            <span class="font-semibold">Lit Web Components</span> dan
+            <span class="font-semibold">Tailwind CSS</span>, dikombinasikan
+            dengan sistem bundling cepat dari
+            <span class="font-semibold">esbuild</span>, serta caching pintar
+            melalui <span class="font-semibold">Workbox</span> dan
+            <span class="font-semibold">IndexedDB (idb)</span>. Arsitektur
+            berbasis <span class="italic">App Shell</span> menjamin waktu muat
+            super cepat dan pengalaman pengguna yang stabil.
           </p>
         </div>
 
         <div class="grid md:grid-cols-3 gap-4">
           <feature-card
-            title="Web Components"
-            icon="🧩"
+            title="App Shell Architecture"
+            icon="🏗️"
             color="green"
-            description="Bangun antarmuka modular, reusable, dan berbasis standar web melalui LitElement."
+            description="Struktur UI utama (header, footer, router) dimuat instan dari cache agar tetap berfungsi tanpa koneksi internet."
           ></feature-card>
 
           <feature-card
-            title="Tailwind CSS"
-            icon="🎨"
+            title="Offline Data"
+            icon="💾"
             color="blue"
-            description="Gunakan pendekatan utility-first untuk styling yang efisien dan konsisten tanpa CSS tambahan."
+            description="Simpan dan tampilkan data API secara lokal menggunakan IndexedDB — tetap berfungsi walau jaringan terputus."
           ></feature-card>
 
           <feature-card
-            title="Build Cepat"
+            title="Cepat & Installable"
             icon="⚡"
             color="yellow"
-            description="Proses bundling super cepat menggunakan esbuild — cocok untuk pengembangan dan produksi."
+            description="Build super cepat dengan esbuild dan PWA manifest yang memungkinkan aplikasi diinstal ke perangkat pengguna."
           ></feature-card>
         </div>
 
-        <footer class="text-sm text-gray-500 mt-6">
-          Gunakan menu navigasi di bagian atas untuk menjelajahi struktur
-          komponen, halaman, serta dokumentasi lainnya dari SPA-Template.
+        <footer class="text-sm text-gray-500 mt-6 text-center">
+          Gunakan menu navigasi di bagian atas untuk menjelajahi fitur,
+          dokumentasi, dan arsitektur dari
+          <span class="font-semibold text-green-600">PWA-Template</span>.
         </footer>
       </section>
     `;
@@ -2323,7 +2367,7 @@ var AppNav = class extends i4 {
           class="max-w-screen-xl mx-auto px-4 py-2 flex justify-between items-center"
         >
           <a href="/" @click=${this._navigate} class=${this.isActive("")}>
-            SPA Template
+            PWA Template
           </a>
           <!-- Hamburger for small screens -->
           <button
@@ -2629,7 +2673,7 @@ var AppFooter = class extends i4 {
           <div class="flex items-center gap-2">
             <span class="text-base">©</span>
             <span>
-              ${(/* @__PURE__ */ new Date()).getFullYear()} spa-template v${"1.0.5"} — All
+              ${(/* @__PURE__ */ new Date()).getFullYear()} pwa-template v${"1.0.5"} — All
               rights reserved.
             </span>
           </div>
@@ -2642,7 +2686,7 @@ var AppFooter = class extends i4 {
             >
             <span class="text-gray-400">|</span>
             <a
-              href="https://github.com/slametsampon/spa-template"
+              href="https://github.com/slametsampon/pwa-template"
               target="_blank"
               rel="noopener"
               class="text-blue-600 dark:text-blue-400 hover:underline hover:text-blue-700 dark:hover:text-blue-300 transition"
@@ -16342,7 +16386,7 @@ function createMqttContext() {
 var AppShell = class extends i4 {
   constructor() {
     super(...arguments);
-    this.basePath = window.location.hostname === "127.0.0.1" ? "/" : "/spa-template/";
+    this.basePath = window.location.hostname === "127.0.0.1" ? "/" : "/pwa-template/";
     this.currentPath = window.location.pathname;
     this.theme = "light";
     this.providedTheme = "light";
@@ -17016,4 +17060,4 @@ mqtt/dist/mqtt.esm.js:
     (*! regenerator-runtime -- Copyright (c) 2014-present, Facebook, Inc. -- license (MIT): https://github.com/babel/babel/blob/main/packages/babel-helpers/LICENSE *)
   *)
 */
-//# sourceMappingURL=/spa-template/main.js.map
+//# sourceMappingURL=/pwa-template/main.js.map
